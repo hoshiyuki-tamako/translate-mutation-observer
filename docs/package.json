@@ -1,0 +1,19 @@
+{
+  "name": "translate-mutation-observer",
+  "version": "0.0.1",
+  "description": "Translate page using mutation observer",
+  "main": "index.js",
+  "authors": "hoshiyuki-tamako",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hoshiyuki-tamako/translate-mutation-observer.git"
+  },
+  "scripts": {
+    "dev": "vuepress dev src",
+    "build": "vuepress build src"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "vuepress": "^1.5.3"
+  }
+}

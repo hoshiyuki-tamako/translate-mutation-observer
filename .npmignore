@@ -1,0 +1,6 @@
+.nyc_output
+.github
+.vscode
+docs
+test
+.nycrc
