@@ -1,10 +1,22 @@
 # Usages
 
+## Browser
+
+```html
+<script type="module">
+import { TranslateMutationObserver } from 'https://unpkg.com/translate-mutation-observer/dist/index.js';
+TranslateMutationObserver.n((str) => str.toLocaleLowerCase());
+document.body.innerText = "TEST";
+</script>
+<body></body>
+```
+
 ## Basic
 
 ```ts
 import { TranslateMutationObserver } from 'translate-mutation-observer';
 
+// some translate function that take a full string and translate it
 const t = (str: string) => str;
 TranslateMutationObserver.n(t);
 ```
