@@ -4,7 +4,8 @@ export type TranslateFunction = (str: string) => string;
 
 export type TranslateOptions = {
   targets?: Iterable<Node>,
-  translateAttributes?: string[],
+  attributes?: string[],
+  attributeStartsWith?: string[],
 };
 
 export class TranslateMutationObserver {
@@ -21,8 +22,9 @@ export class TranslateMutationObserver {
   #queue = false;
 
   #defaultOptions = {
-    targets: [document.documentElement],
-    translateAttributes: ['aria-', 'alt'],
+    targets: [document.body],
+    attributes: [],
+    attributeStartsWith: ['aria-', 'alt'],
   };
 
   public constructor(translateFunction: TranslateFunction, options?: TranslateOptions) {
@@ -59,14 +61,16 @@ export class TranslateMutationObserver {
   }
 
   public translate(nodes: NodeList | HTMLElement[]): void {
-    const translateAttributes = this.options?.translateAttributes || this.#defaultOptions.translateAttributes;
+    const attributes = this.options?.attributes || this.#defaultOptions.attributes;
+    const attributeStartsWith = this.options?.attributeStartsWith || this.#defaultOptions.attributeStartsWith;
 
     for (const node of nodes) {
       if (node.nodeType === node.TEXT_NODE && node.nodeValue) {
         node.nodeValue = this.translateFunction(node.nodeValue);
       } else if (node.nodeType === node.ATTRIBUTE_NODE && (node as HTMLElement).attributes) {
         for (const attribute of (node as HTMLElement).attributes) {
-          if (translateAttributes.some((a) => attribute.name.startsWith(a)) && attribute.value) {
+          const requiredTranslate = attributes.includes(attribute.name) || attributeStartsWith.some((a) => attribute.name.startsWith(a));
+          if (requiredTranslate && attribute.value) {
             const newValue = this.translateFunction(attribute.value);
             if (attribute.value !== newValue) {
               attribute.value = newValue;

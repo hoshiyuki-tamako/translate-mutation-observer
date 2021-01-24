@@ -4,11 +4,13 @@ module.exports = {
   /**
    * Ref：https://v1.vuepress.vuejs.org/config/#title
    */
-  title: 'Vuepress Docs Boilerplate',
+  title: 'Translate Mutation Observer',
   /**
    * Ref：https://v1.vuepress.vuejs.org/config/#description
    */
   description: description,
+
+  base: process.env.NODE_ENV === 'production' ? '/translate-mutation-observer/' : '/',
 
   /**
    * Extra tags to be injected to the page HTML `<head>`
@@ -20,6 +22,12 @@ module.exports = {
     ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
     ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }]
   ],
+
+  markdown: {
+    extractHeaders: [ 'h2', 'h3', 'h4' ],
+  },
+
+  theme: 'yuu',
 
   /**
    * Theme configuration, here is the default theme configuration for VuePress.
@@ -37,15 +45,8 @@ module.exports = {
         text: 'Guide',
         link: '/guide/',
       },
-      {
-        text: 'Config',
-        link: '/config/'
-      },
-      {
-        text: 'VuePress',
-        link: 'https://v1.vuepress.vuejs.org'
-      }
     ],
+    sidebarDepth: 3,
     sidebar: {
       '/guide/': [
         {
@@ -53,7 +54,7 @@ module.exports = {
           collapsable: false,
           children: [
             '',
-            'using-vue',
+            'usages',
           ]
         }
       ],
