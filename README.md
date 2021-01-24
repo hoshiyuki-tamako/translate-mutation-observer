@@ -43,3 +43,14 @@ const t = (str: string) => str;
 const translateMutationObserver = TranslateMutationObserver.n(t);
 translateMutationObserver.translate();
 ```
+
+### Browser
+
+```html
+<script type="module">
+import { TranslateMutationObserver } from 'https://unpkg.com/translate-mutation-observer/dist/index.js';
+TranslateMutationObserver.n((str) => str.toLocaleLowerCase());
+document.body.innerText = "TEST";
+</script>
+<body></body>
+```
