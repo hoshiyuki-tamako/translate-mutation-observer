@@ -60,11 +60,11 @@ export class TranslateMutationObserver {
     return mutationObserver;
   }
 
-  public translate(nodes: NodeList | HTMLElement[]): void {
+  public translate(nodes?: NodeList | HTMLElement[]): void {
     const attributes = this.options?.attributes || this.#defaultOptions.attributes;
     const attributeStartsWith = this.options?.attributeStartsWith || this.#defaultOptions.attributeStartsWith;
 
-    for (const node of nodes) {
+    for (const node of nodes || this.options?.targets || this.#defaultOptions.targets) {
       if (node.nodeType === node.TEXT_NODE && node.nodeValue) {
         node.nodeValue = this.translateFunction(node.nodeValue);
       } else if (node.nodeType === node.ATTRIBUTE_NODE && (node as HTMLElement).attributes) {

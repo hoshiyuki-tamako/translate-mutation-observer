@@ -33,3 +33,13 @@ import t from './zh-TW.json';
 // some kind of lookup table replace character one by one
 TranslateMutationObserver.n((str: string) => str.split('').map((s) => t[s]).join());
 ```
+
+### Trigger Entire Page Translation
+
+```ts
+import { TranslateMutationObserver } from 'translate-mutation-observer';
+
+const t = (str: string) => str;
+const translateMutationObserver = TranslateMutationObserver.n(t);
+translateMutationObserver.translate();
+```
