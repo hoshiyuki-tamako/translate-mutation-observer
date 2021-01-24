@@ -1,6 +1,6 @@
 {
   "name": "translate-mutation-observer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Translate page using mutation observer",
   "repository": {
     "type": "git",
@@ -10,6 +10,7 @@
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "browser": "dist/index.js",
+  "module": "dist/index.js",
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
     "test": "./node_modules/.bin/nyc ./node_modules/.bin/ts-mocha --check-leaks --parallel test/**/**/*test.ts",
