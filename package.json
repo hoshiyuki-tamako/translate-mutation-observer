@@ -9,13 +9,14 @@
   "homepage": "https://hoshiyuki-tamako.github.io/translate-mutation-observer/guide/",
   "main": "src/index.js",
   "types": "src/index.d.ts",
+  "browser": "dist/index.js",
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
     "test": "./node_modules/.bin/nyc ./node_modules/.bin/ts-mocha --check-leaks --parallel test/**/**/*test.ts",
     "build:test": "./node_modules/.bin/tsc --noEmit",
     "build:clean": "./node_modules/.bin/tsc --build --clean",
     "build": "./node_modules/.bin/tsc",
-    "build:browser": "./node_modules/.bin/esbuild ./src --bundle --minify --sourcemap --outfile=dist/index.js"
+    "build:browser": "./node_modules/.bin/esbuild ./src --bundle --minify --sourcemap --target=es2016 --outfile=dist/index.js"
   },
   "keywords": [
     "translate",
