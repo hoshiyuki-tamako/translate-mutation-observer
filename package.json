@@ -1,6 +1,6 @@
 {
   "name": "translate-mutation-observer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Translate page using mutation observer",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "build:test": "./node_modules/.bin/tsc --noEmit",
     "build:clean": "./node_modules/.bin/tsc --build --clean",
     "build": "./node_modules/.bin/tsc",
-    "build:browser": "./node_modules/.bin/esbuild ./src --bundle --minify --sourcemap --target=es2016 --outfile=dist/index.js"
+    "build:browser": "./node_modules/.bin/esbuild ./src --bundle --minify --sourcemap --format=esm --target=es2016 --outfile=dist/index.js"
   },
   "keywords": [
     "translate",
