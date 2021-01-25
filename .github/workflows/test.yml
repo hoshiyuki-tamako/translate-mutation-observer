@@ -1,12 +1,14 @@
-name: npm publish
+name: test
 
 on:
   push:
-    tags:
+    branches:
+      - '**'
+    tags-ignore:
       - v*
 
 jobs:
-  publish:
+  node14:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -24,9 +26,3 @@ jobs:
       - run: npm i
       - run: npm run lint
       - run: npm test
-      - run: npm run build
-      - run: npm run build:browser
-
-      - uses: JS-DevTools/npm-publish@v1
-        with:
-          token: ${{ secrets.NPM_TOKEN }}

@@ -4,7 +4,7 @@
 
 ```html
 <script type="module">
-import { TranslateMutationObserver } from 'https://unpkg.com/translate-mutation-observer/dist/index.js';
+import { TranslateMutationObserver } from 'https://unpkg.com/translate-mutation-observer@1.0.4/dist/index.js';
 TranslateMutationObserver.n((str) => str.toLocaleLowerCase());
 document.body.innerText = "TEST";
 </script>
@@ -21,13 +21,23 @@ const t = (str: string) => str;
 TranslateMutationObserver.n(t);
 ```
 
-## Translate Each Char
+## Translate Each Character
 
 ```ts
 import { TranslateMutationObserver } from 'translate-mutation-observer';
 
 const t = (str: string) => str.split('').map((s) => s).join();
 TranslateMutationObserver.n(t);
+```
+
+## Trigger Translation for document.body
+
+```ts
+import { TranslateMutationObserver } from 'translate-mutation-observer';
+
+const t = (str: string) => str;
+const translateMutationObserver = TranslateMutationObserver.n(t);
+translateMutationObserver.translate();
 ```
 
 ## Translate Entire Document
@@ -55,8 +65,29 @@ TranslateMutationObserver.n(t, { attributes: ['src'] });
 import { TranslateMutationObserver } from 'translate-mutation-observer';
 
 const t = (str: string) => str;
-// ['aria-', 'alt'] is default value for attributeStartsWith
-TranslateMutationObserver.n(t, { attributeStartsWith: ['aria-', 'alt'] });
+// ['aria-', 'alt', 'title'] is default value for attributeStartsWith
+TranslateMutationObserver.n(t, { attributeStartsWith: ['aria-', 'alt', 'title'] });
+```
+
+## Function Parameters
+
+```ts
+import { TranslateMutationObserver } from 'translate-mutation-observer';
+
+const t = (str: string, { node }: { node: Node }) => {
+  if (node.nodeType === node.TEXT_NODE) {
+    // handle node type is text
+  } else {
+    // translating attributes
+  }
+
+  if (node instanceof HTMLVideoElement) {
+    //
+  }
+
+  return str;
+};
+TranslateMutationObserver.n(t);
 ```
 
 ## Translate To Simplified Chinese Using External Library

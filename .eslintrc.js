@@ -5,7 +5,7 @@ module.exports = {
   extends: [
     'airbnb-base',
     'eslint:recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -20,6 +20,7 @@ module.exports = {
     'max-len': 'off',
     'class-methods-use-this': 'off',
     'no-unused-expressions': 'off',
+    'max-classes-per-file': 'off',
   },
   settings: {
     'import/resolver': {

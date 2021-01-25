@@ -1,6 +1,10 @@
 import sleep from 'sleep-promise';
 
-export type TranslateFunction = (str: string) => string;
+export type TranslateFunctionParameters = {
+  node: Node,
+};
+
+export type TranslateFunction = (str: string, parameters: TranslateFunctionParameters) => string;
 
 export type TranslateOptions = {
   targets?: Iterable<Node>,
@@ -24,12 +28,14 @@ export class TranslateMutationObserver {
   #defaultOptions = {
     targets: [document.body],
     attributes: [],
-    attributeStartsWith: ['aria-', 'alt'],
+    attributeStartsWith: ['aria-', 'alt', 'title'],
   };
 
   public constructor(translateFunction: TranslateFunction, options?: TranslateOptions) {
     this.translateFunction = translateFunction;
     this.options = options;
+    this.validateOptions(this.options);
+
     this.mutationObserver = this.createMutationObserver();
   }
 
@@ -60,18 +66,39 @@ export class TranslateMutationObserver {
     return mutationObserver;
   }
 
+  private validateOptions(options?: TranslateOptions) {
+    if (options?.targets && !Array.isArray(options.targets)) {
+      throw new TypeError(`options.targets should be array: ${options.targets.toString()}`);
+    }
+
+    if (options?.attributes && !Array.isArray(options.attributes)) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      throw new TypeError(`options.attributes should be array: ${options.attributes.toString()}`);
+    }
+
+    if (options?.attributeStartsWith && !Array.isArray(options.attributeStartsWith)) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      throw new TypeError(`options.attributeStartsWith should be array: ${options.attributeStartsWith.toString()}`);
+    }
+  }
+
+  //
   public translate(nodes?: NodeList | HTMLElement[]): void {
     const attributes = this.options?.attributes || this.#defaultOptions.attributes;
     const attributeStartsWith = this.options?.attributeStartsWith || this.#defaultOptions.attributeStartsWith;
 
     for (const node of nodes || this.options?.targets || this.#defaultOptions.targets) {
       if (node.nodeType === node.TEXT_NODE && node.nodeValue) {
-        node.nodeValue = this.translateFunction(node.nodeValue);
-      } else if (node.nodeType === node.ATTRIBUTE_NODE && (node as HTMLElement).attributes) {
+        node.nodeValue = this.translateFunction(node.nodeValue, { node });
+      }
+
+      if ((node as HTMLElement).attributes) {
         for (const attribute of (node as HTMLElement).attributes) {
           const requiredTranslate = attributes.includes(attribute.name) || attributeStartsWith.some((a) => attribute.name.startsWith(a));
           if (requiredTranslate && attribute.value) {
-            const newValue = this.translateFunction(attribute.value);
+            const newValue = this.translateFunction(attribute.value, { node });
             if (attribute.value !== newValue) {
               attribute.value = newValue;
             }
@@ -79,7 +106,7 @@ export class TranslateMutationObserver {
         }
       }
 
-      if (node.childNodes) {
+      if (node.childNodes.length) {
         this.translate(node.childNodes);
       }
     }
