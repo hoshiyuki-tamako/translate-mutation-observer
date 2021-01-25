@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { cachedOptions } from './cachedOptions';
+
 export type TranslateFunctionParameters = {
   node: Node,
 };
@@ -14,16 +17,26 @@ export type TranslateOptions = {
   filterAttribute?: TranslateAttributeFilter,
 };
 
-type TranslateOptionsRequired = {
+export type TranslateOptionsRequired = {
   targets: Iterable<Node>,
   filter: TranslateFilter,
   filterAttribute: TranslateAttributeFilter,
 };
 
-export const cachedOptions = new WeakMap();
-
 export class NodeTranslator {
-  public translateFunction: TranslateFunction;
+  public set translateFunction(translateFunction: TranslateFunction) {
+    if (!(translateFunction instanceof Function)) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      throw new TypeError(`translateFunction should be callable: ${translateFunction.toString()}`);
+    }
+
+    this.#translateFunction = translateFunction;
+  }
+
+  public get translateFunction(): TranslateFunction {
+    return this.#translateFunction;
+  }
 
   public set options(options: TranslateOptions | undefined) {
     if (options?.targets && !Array.isArray(options.targets)) {
@@ -56,6 +69,8 @@ export class NodeTranslator {
   }
 
   // options
+  #translateFunction!: TranslateFunction;
+
   #originalOption?: TranslateOptions;
 
   #defaultOptions = {
@@ -71,11 +86,11 @@ export class NodeTranslator {
 
   //
   public async translate(nodes?: Iterable<Node>): Promise<void> {
-    const iterators = [nodes || cachedOptions.get(this).targets];
+    const iterators = [nodes || cachedOptions.get(this)!.targets];
     const translatePromises = [] as Promise<void>[];
     while (iterators.length) {
       for (const node of iterators.pop() as Iterable<Node>) {
-        if (cachedOptions.get(this).filter(node)) {
+        if (cachedOptions.get(this)!.filter(node)) {
           if (node.nodeType === node.TEXT_NODE && node.nodeValue) {
             const text = node.nodeValue;
             translatePromises.push((async () => {
@@ -83,7 +98,7 @@ export class NodeTranslator {
             })());
           } else if (node instanceof Element) {
             for (const attribute of node.attributes) {
-              if (cachedOptions.get(this).filterAttribute(attribute, node) && attribute.value) {
+              if (cachedOptions.get(this)!.filterAttribute(attribute, node) && attribute.value) {
                 const { value } = attribute;
                 translatePromises.push((async () => {
                   const newValue = await this.translateFunction(value, { node });

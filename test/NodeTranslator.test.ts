@@ -251,10 +251,12 @@ export default class NodeTranslatorTest extends TestBase {
 
   @test()
   public async typeCheck(): Promise<void> {
+    expect(() => new NodeTranslator(1 as never)).throw(TypeError);
     expect(() => new NodeTranslator(this.t, { targets: 1 } as never)).throw(TypeError);
     expect(() => new NodeTranslator(this.t, { filter: 1 } as never)).throw(TypeError);
     expect(() => new NodeTranslator(this.t, { filterAttribute: 1 } as never)).throw(TypeError);
 
+    expect(() => new NodeTranslator(this.t)).not.throw();
     expect(() => new NodeTranslator(this.t, { targets: [document] })).not.throw();
     expect(() => new NodeTranslator(this.t, { filter: () => true })).not.throw();
     expect(() => new NodeTranslator(this.t, { filterAttribute: () => true })).not.throw();
