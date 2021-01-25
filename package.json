@@ -1,6 +1,6 @@
 {
   "name": "translate-mutation-observer",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Translate page using mutation observer",
   "repository": {
     "type": "git",
@@ -13,11 +13,12 @@
   "module": "dist/index.js",
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
+    "test:sample-server": "./node_modules/.bin/http-server",
     "test": "./node_modules/.bin/nyc ./node_modules/.bin/ts-mocha --check-leaks --parallel test/**/**/*test.ts",
     "build:test": "./node_modules/.bin/tsc --noEmit",
     "build:clean": "./node_modules/.bin/tsc --build --clean",
     "build": "./node_modules/.bin/tsc",
-    "build:browser": "./node_modules/.bin/esbuild ./src --bundle --minify --sourcemap --format=esm --target=es2016 --outfile=dist/index.js"
+    "build:browser": "./node_modules/.bin/esbuild ./src --bundle --minify --format=esm --target=es2016 --outfile=dist/index.js"
   },
   "keywords": [
     "translate",
@@ -32,6 +33,7 @@
     "@types/chai": "^4.2.14",
     "@types/eslint": "^7.2.6",
     "@types/faker": "^5.1.5",
+    "@types/http-server": "^0.10.1",
     "@types/jsdom": "^16.2.6",
     "@types/mocha": "^8.2.0",
     "@typescript-eslint/eslint-plugin": "^4.14.0",
@@ -43,6 +45,7 @@
     "eslint-import-resolver-typescript": "^2.3.0",
     "eslint-plugin-import": "^2.22.1",
     "faker": "^5.1.0",
+    "http-server": "^0.12.3",
     "jsdom": "^16.4.0",
     "mocha": "^8.2.1",
     "nyc": "^15.1.0",

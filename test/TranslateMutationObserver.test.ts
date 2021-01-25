@@ -253,6 +253,22 @@ export default class TranslateMutationObserverTest {
   }
 
   @test()
+  public nonElementNodeShouldIgnore(): void {
+    const text = faker.random.alpha();
+    const value = faker.random.alpha();
+
+    const title = document.createAttribute('title');
+    title.value = value;
+    const comment = document.createComment(text);
+
+    const translateMutationObserver = new TranslateMutationObserver(this.t);
+    translateMutationObserver.translate([title, comment]);
+
+    expect(title).property('value', value);
+    expect(comment).property('nodeValue', text);
+  }
+
+  @test()
   public typeCheck(): void {
     expect(() => new TranslateMutationObserver(this.t, { targets: 1 } as never)).throw(TypeError);
     expect(() => new TranslateMutationObserver(this.t, { attributes: 1 } as never)).throw(TypeError);
