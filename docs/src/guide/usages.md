@@ -56,7 +56,7 @@ TranslateMutationObserver.n(t, { targets: [document.documentElement] });
 import { TranslateMutationObserver } from 'translate-mutation-observer';
 
 const t = (str: string) => str;
-TranslateMutationObserver.n(t, { attributes: ['src'] });
+TranslateMutationObserver.n(t, { attributes: ['alt', 'title'] });
 ```
 
 ## Translate Attributes startsWith
@@ -65,8 +65,27 @@ TranslateMutationObserver.n(t, { attributes: ['src'] });
 import { TranslateMutationObserver } from 'translate-mutation-observer';
 
 const t = (str: string) => str;
-// ['aria-', 'alt', 'title'] is default value for attributeStartsWith
-TranslateMutationObserver.n(t, { attributeStartsWith: ['aria-', 'alt', 'title'] });
+TranslateMutationObserver.n(t, { attributeStartsWith: ['aria-'] });
+```
+
+## Filter
+
+```ts
+import { TranslateMutationObserver } from 'translate-mutation-observer';
+
+const t = (str: string) => str;
+TranslateMutationObserver.n(t, {
+  filter(node: Node) {
+    // if element contains class of .do-not-translate
+    if (node instanceof Element && node.classList.contains('do-not-translate')) {
+      // false to skip
+      return false;
+    }
+
+    // true for allow to translate
+    return true;
+  }
+});
 ```
 
 ## Function Parameters
@@ -80,11 +99,6 @@ const t = (str: string, { node }: { node: Node }) => {
   } else {
     // translating attributes
   }
-
-  if (node instanceof HTMLVideoElement) {
-    //
-  }
-
   return str;
 };
 TranslateMutationObserver.n(t);

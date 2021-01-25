@@ -6,16 +6,20 @@ export type TranslateFunctionParameters = {
 
 export type TranslateFunction = (str: string, parameters: TranslateFunctionParameters) => string;
 
+export type TranslateFilter = (node: Node) => boolean;
+
 export type TranslateOptions = {
   targets?: Iterable<Node>,
   attributes?: string[],
   attributeStartsWith?: string[],
+  filter?: TranslateFilter,
 };
 
 type TranslateOptionsRequired = {
   targets: Iterable<Node>,
   attributes: string[],
   attributeStartsWith: string[],
+  filter: TranslateFilter,
 };
 
 export class TranslateMutationObserver {
@@ -46,6 +50,7 @@ export class TranslateMutationObserver {
     this.#cachedOptions.targets = this.#originalOption?.targets || this.#defaultOptions.targets;
     this.#cachedOptions.attributes = this.#originalOption?.attributes || this.#defaultOptions.attributes;
     this.#cachedOptions.attributeStartsWith = this.#originalOption?.attributeStartsWith || this.#defaultOptions.attributeStartsWith;
+    this.#cachedOptions.filter = this.#originalOption?.filter || this.#defaultOptions.filter;
   }
 
   public get options(): TranslateOptions | undefined {
@@ -62,7 +67,8 @@ export class TranslateMutationObserver {
   #defaultOptions = {
     targets: [document.body],
     attributes: [],
-    attributeStartsWith: ['aria-', 'alt', 'title'],
+    attributeStartsWith: [],
+    filter: () => true,
   } as TranslateOptionsRequired;
 
   #cachedOptions = this.#defaultOptions;
@@ -100,35 +106,36 @@ export class TranslateMutationObserver {
     }
     this.#queue = true;
     for (const mutation of mutations) {
-      this.translate([mutation.target]);
-      this.translate(mutation.addedNodes);
+      this.translate([mutation.target]).translate(mutation.addedNodes);
     }
     await sleep(0);
     this.#queue = false;
   }
 
   //
-  public translate(nodes?: Iterable<Node>): void {
-    const childNodes = [nodes || this.#cachedOptions.targets];
-    while (childNodes.length) {
-      const it = childNodes.pop() as Iterable<Node>;
-      for (const node of it) {
-        if (node.nodeType === node.TEXT_NODE && node.nodeValue) {
-          node.nodeValue = this.translateFunction(node.nodeValue, { node });
-        } else if (node instanceof Element) {
-          for (const attribute of node.attributes) {
-            const requiredTranslate = this.#cachedOptions.attributes.includes(attribute.name) || this.#cachedOptions.attributeStartsWith.some((a) => attribute.name.startsWith(a));
-            if (requiredTranslate && attribute.value) {
-              const newValue = this.translateFunction(attribute.value, { node });
-              if (attribute.value !== newValue) {
-                attribute.value = newValue;
+  public translate(nodes?: Iterable<Node>): this {
+    const iterators = [nodes || this.#cachedOptions.targets];
+    while (iterators.length) {
+      for (const node of iterators.pop() as Iterable<Node>) {
+        if (this.#cachedOptions.filter(node)) {
+          if (node.nodeType === node.TEXT_NODE && node.nodeValue) {
+            node.nodeValue = this.translateFunction(node.nodeValue, { node });
+          } else if (node instanceof Element) {
+            for (const attribute of node.attributes) {
+              const requiredTranslate = this.#cachedOptions.attributes.includes(attribute.name) || this.#cachedOptions.attributeStartsWith.some((a) => attribute.name.startsWith(a));
+              if (requiredTranslate && attribute.value) {
+                const newValue = this.translateFunction(attribute.value, { node });
+                if (attribute.value !== newValue) {
+                  attribute.value = newValue;
+                }
               }
             }
-          }
 
-          childNodes.push(node.childNodes);
+            iterators.push(node.childNodes);
+          }
         }
       }
     }
+    return this;
   }
 }

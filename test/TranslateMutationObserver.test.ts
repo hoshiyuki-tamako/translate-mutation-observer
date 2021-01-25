@@ -31,7 +31,7 @@ export default class TranslateMutationObserverTest {
 
   @test()
   public translateFunctionParamType(): void {
-    const text = faker.random.alpha();
+    const text = faker.lorem.word().toLocaleLowerCase();
 
     const div = document.createElement('div');
     div.textContent = text;
@@ -58,7 +58,7 @@ export default class TranslateMutationObserverTest {
 
   @test()
   public defaultTargets(): void {
-    const text = faker.random.alpha();
+    const text = faker.lorem.word().toLocaleLowerCase();
     document.body.textContent = text;
 
     const translateMutationObserver = new TranslateMutationObserver((str) => {
@@ -70,7 +70,7 @@ export default class TranslateMutationObserverTest {
 
   @test()
   public targets(): void {
-    const text = faker.random.alpha();
+    const text = faker.lorem.word().toLocaleLowerCase();
     const div = document.createElement('div');
     div.textContent = text;
     const translateMutationObserver = new TranslateMutationObserver(this.t, {
@@ -83,7 +83,7 @@ export default class TranslateMutationObserverTest {
 
   @test()
   public attributes(): void {
-    const value = faker.random.alpha();
+    const value = faker.lorem.word().toLocaleLowerCase();
 
     const div = document.createElement('div');
     div.setAttribute('id', value);
@@ -103,28 +103,8 @@ export default class TranslateMutationObserverTest {
   }
 
   @test()
-  public defaultAttributeStartsWith(): void {
-    const value = faker.random.alpha();
-
-    const div = document.createElement('div');
-    div.setAttribute('aria-label', value);
-    div.setAttribute('alt', value);
-    div.setAttribute('title', value);
-
-    const translateMutationObserver = new TranslateMutationObserver(this.t, {
-      targets: [div],
-    });
-
-    translateMutationObserver.translate();
-
-    expect(div.getAttribute('aria-label')).equal(value.toLocaleUpperCase());
-    expect(div.getAttribute('alt')).equal(value.toLocaleUpperCase());
-    expect(div.getAttribute('title')).equal(value.toLocaleUpperCase());
-  }
-
-  @test()
   public attributeStartsWith(): void {
-    const value = faker.random.alpha();
+    const value = faker.lorem.word().toLocaleLowerCase();
 
     const div = document.createElement('div');
     div.dataset.test = value;
@@ -139,8 +119,33 @@ export default class TranslateMutationObserverTest {
   }
 
   @test()
+  public filter(): void {
+    const text = faker.lorem.word().toLocaleLowerCase();
+
+    const div = document.createElement('div');
+    const span1 = document.createElement('span');
+    span1.textContent = text;
+    const span2 = document.createElement('span');
+    span2.textContent = text;
+    span2.classList.add('do-not-translate');
+    div.appendChild(span1);
+    div.appendChild(span2);
+
+    const translateMutationObserver = new TranslateMutationObserver(this.t, {
+      targets: [div],
+      filter(node) {
+        return !(node instanceof Element && node.classList.contains('do-not-translate'));
+      },
+    });
+    translateMutationObserver.translate();
+
+    expect(span1).property('textContent', text.toLocaleUpperCase());
+    expect(span2).property('textContent', text);
+  }
+
+  @test()
   public childNodes(): void {
-    const text = faker.random.alpha();
+    const text = faker.lorem.word().toLocaleLowerCase();
 
     const div = document.createElement('div');
     const span = document.createElement('span');
@@ -157,7 +162,7 @@ export default class TranslateMutationObserverTest {
 
   @test()
   public childAttribute(): void {
-    const value = faker.random.alpha();
+    const value = faker.lorem.word().toLocaleLowerCase();
 
     const div = document.createElement('div');
     const span = document.createElement('span');
@@ -175,8 +180,8 @@ export default class TranslateMutationObserverTest {
 
   @test()
   public customNode(): void {
-    const text = faker.random.alpha();
-    const value = faker.random.alpha();
+    const text = faker.lorem.word().toLocaleLowerCase();
+    const value = faker.lorem.word().toLocaleLowerCase();
 
     const div = document.createElement('div');
     const span = document.createElement('span');
@@ -203,7 +208,7 @@ export default class TranslateMutationObserverTest {
 
   @test()
   public doNotTranslateAttribute(): void {
-    const value = faker.random.alpha();
+    const value = faker.lorem.word().toLocaleLowerCase();
 
     const div = document.createElement('div');
     const span = document.createElement('span');
@@ -225,8 +230,8 @@ export default class TranslateMutationObserverTest {
 
   @test()
   public mutationFunction(): void {
-    const text = faker.random.alpha();
-    const value = faker.random.alpha();
+    const text = faker.lorem.word().toLocaleLowerCase();
+    const value = faker.lorem.word().toLocaleLowerCase();
 
     const div = document.createElement('div');
     const span = document.createElement('span');
@@ -234,8 +239,8 @@ export default class TranslateMutationObserverTest {
     span.textContent = text;
     div.appendChild(span);
 
-    const addedText = faker.random.alpha();
-    const addedValue = faker.random.alpha();
+    const addedText = faker.lorem.word().toLocaleLowerCase();
+    const addedValue = faker.lorem.word().toLocaleLowerCase();
     const addedSpan = document.createElement('span');
     addedSpan.id = addedValue;
     addedSpan.textContent = addedText;
@@ -262,8 +267,8 @@ export default class TranslateMutationObserverTest {
 
   @test()
   public nonElementNodeShouldIgnore(): void {
-    const text = faker.random.alpha();
-    const value = faker.random.alpha();
+    const text = faker.lorem.word().toLocaleLowerCase();
+    const value = faker.lorem.word().toLocaleLowerCase();
 
     const title = document.createAttribute('title');
     title.value = value;
@@ -278,7 +283,7 @@ export default class TranslateMutationObserverTest {
 
   @test()
   public translateAttributeSameValue(): void {
-    const value = faker.random.alpha();
+    const value = faker.lorem.word().toLocaleLowerCase();
 
     const span = document.createElement('span');
     span.id = value;
