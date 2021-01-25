@@ -1,79 +1,16 @@
 import sleep from 'sleep-promise';
 
-export type TranslateFunctionParameters = {
-  node: Node,
-};
+import { NodeTranslator, TranslateFunction, TranslateOptions } from './NodeTranslator';
 
-export type TranslateFunction = (str: string, parameters: TranslateFunctionParameters) => string;
-
-export type TranslateFilter = (node: Node) => boolean;
-
-export type TranslateOptions = {
-  targets?: Iterable<Node>,
-  attributes?: string[],
-  attributeStartsWith?: string[],
-  filter?: TranslateFilter,
-};
-
-type TranslateOptionsRequired = {
-  targets: Iterable<Node>,
-  attributes: string[],
-  attributeStartsWith: string[],
-  filter: TranslateFilter,
-};
-
-export class TranslateMutationObserver {
+export class TranslateMutationObserver extends NodeTranslator {
   public static n(translateFunction: TranslateFunction, options?: TranslateOptions, mutationObserverOptions?: MutationObserverInit): TranslateMutationObserver {
     return new TranslateMutationObserver(translateFunction, options, mutationObserverOptions);
-  }
-
-  public translateFunction: TranslateFunction;
-
-  public set options(options: TranslateOptions | undefined) {
-    if (options?.targets && !Array.isArray(options.targets)) {
-      throw new TypeError(`options.targets should be array: ${options.targets.toString()}`);
-    }
-
-    if (options?.attributes && !Array.isArray(options.attributes)) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      throw new TypeError(`options.attributes should be array: ${options.attributes.toString()}`);
-    }
-
-    if (options?.attributeStartsWith && !Array.isArray(options.attributeStartsWith)) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      throw new TypeError(`options.attributeStartsWith should be array: ${options.attributeStartsWith.toString()}`);
-    }
-
-    this.#originalOption = options;
-    this.#cachedOptions.targets = this.#originalOption?.targets || this.#defaultOptions.targets;
-    this.#cachedOptions.attributes = this.#originalOption?.attributes || this.#defaultOptions.attributes;
-    this.#cachedOptions.attributeStartsWith = this.#originalOption?.attributeStartsWith || this.#defaultOptions.attributeStartsWith;
-    this.#cachedOptions.filter = this.#originalOption?.filter || this.#defaultOptions.filter;
-  }
-
-  public get options(): TranslateOptions | undefined {
-    return this.#originalOption;
   }
 
   public mutationObserver: MutationObserver;
 
   #queue = false;
 
-  // options
-  #originalOption?: TranslateOptions;
-
-  #defaultOptions = {
-    targets: [document.body],
-    attributes: [],
-    attributeStartsWith: [],
-    filter: () => true,
-  } as TranslateOptionsRequired;
-
-  #cachedOptions = this.#defaultOptions;
-
-  // mutation observer options
   #originalMutationObserverOptions?: MutationObserverInit;
 
   #defaultMutationObserverOptions = {
@@ -84,8 +21,7 @@ export class TranslateMutationObserver {
   } as MutationObserverInit;
 
   public constructor(translateFunction: TranslateFunction, options?: TranslateOptions, mutationObserverOptions?: MutationObserverInit) {
-    this.translateFunction = translateFunction;
-    this.options = options;
+    super(translateFunction, options);
 
     this.#originalMutationObserverOptions = mutationObserverOptions;
 
@@ -94,7 +30,7 @@ export class TranslateMutationObserver {
 
   private createMutationObserver(options?: MutationObserverInit) {
     const mutationObserver = new MutationObserver(this.mutationCallback.bind(this));
-    for (const dom of this.#cachedOptions.targets) {
+    for (const dom of this.cachedOptions.targets) {
       mutationObserver.observe(dom, options || this.#defaultMutationObserverOptions);
     }
     return mutationObserver;
@@ -105,37 +41,15 @@ export class TranslateMutationObserver {
       return;
     }
     this.#queue = true;
+    const translatePromises = [] as Promise<void>[];
     for (const mutation of mutations) {
-      this.translate([mutation.target]).translate(mutation.addedNodes);
+      translatePromises.push(this.translate([mutation.target]), this.translate(mutation.addedNodes));
     }
-    await sleep(0);
-    this.#queue = false;
-  }
-
-  //
-  public translate(nodes?: Iterable<Node>): this {
-    const iterators = [nodes || this.#cachedOptions.targets];
-    while (iterators.length) {
-      for (const node of iterators.pop() as Iterable<Node>) {
-        if (this.#cachedOptions.filter(node)) {
-          if (node.nodeType === node.TEXT_NODE && node.nodeValue) {
-            node.nodeValue = this.translateFunction(node.nodeValue, { node });
-          } else if (node instanceof Element) {
-            for (const attribute of node.attributes) {
-              const requiredTranslate = this.#cachedOptions.attributes.includes(attribute.name) || this.#cachedOptions.attributeStartsWith.some((a) => attribute.name.startsWith(a));
-              if (requiredTranslate && attribute.value) {
-                const newValue = this.translateFunction(attribute.value, { node });
-                if (attribute.value !== newValue) {
-                  attribute.value = newValue;
-                }
-              }
-            }
-
-            iterators.push(node.childNodes);
-          }
-        }
-      }
+    try {
+      await Promise.all(translatePromises);
+    } finally {
+      await sleep(0);
+      this.#queue = false;
     }
-    return this;
   }
 }

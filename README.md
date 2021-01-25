@@ -30,14 +30,14 @@ const t = (str: string) => str;
 TranslateMutationObserver.n(t);
 ```
 
-### Trigger Translation for document.body
+### Without Observer
 
 ```ts
-import { TranslateMutationObserver } from 'translate-mutation-observer';
+import { NodeTranslator } from 'translate-mutation-observer';
 
 const t = (str: string) => str;
-const translateMutationObserver = TranslateMutationObserver.n(t);
-translateMutationObserver.translate();
+const translateMutationObserver = new NodeTranslator(t);
+await translateMutationObserver.translate(document.documentElement);
 ```
 
 ### Browser

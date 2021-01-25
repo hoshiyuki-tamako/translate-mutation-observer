@@ -21,6 +21,9 @@ module.exports = {
     'class-methods-use-this': 'off',
     'no-unused-expressions': 'off',
     'max-classes-per-file': 'off',
+    'import/prefer-default-export': 'off',
+    'import/extensions': 'off',
+    'no-plusplus': 'off',
   },
   settings: {
     'import/resolver': {

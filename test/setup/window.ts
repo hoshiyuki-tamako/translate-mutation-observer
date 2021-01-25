@@ -1,5 +1,6 @@
-import { JSDOM } from 'jsdom';
+import { jsdom } from './jsdom';
 
-const { window } = new JSDOM();
+const { window } = jsdom;
+
 globalThis.document = window.document;
 globalThis.Element = window.Element;

@@ -1,235 +1,27 @@
-/* eslint-disable import/extensions */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import './helper/MutationObserver.ts';
-import './helper/window.ts';
+import './setup';
 
 import { suite, test } from '@testdeck/mocha';
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import faker from 'faker';
 
 import { TranslateMutationObserver } from '../src';
+import { TestBase } from './base/TestBase';
+
+chai.use(chaiAsPromised);
+
+class CustomError extends Error {
+}
 
 @suite()
-export default class TranslateMutationObserverTest {
-  @test()
-  public options(): void {
-    const div = document.createElement('div');
-
-    const targets = [div];
-    const attributes = ['1'];
-    const attributeStartsWith = ['2'];
-    const options = {
-      targets,
-      attributes,
-      attributeStartsWith,
-    };
-
-    const translateMutationObserver = new TranslateMutationObserver(this.t, options);
-    expect(translateMutationObserver).property('translateFunction', this.t);
-    expect(translateMutationObserver).property('options', options);
-  }
-
-  @test()
-  public translateFunctionParamType(): void {
-    const text = faker.lorem.word().toLocaleLowerCase();
-
-    const div = document.createElement('div');
-    div.textContent = text;
-
-    const targets = [div];
-    const attributes = ['1'];
-    const attributeStartsWith = ['2'];
-    const options = {
-      targets,
-      attributes,
-      attributeStartsWith,
-    };
-
-    let called = false;
-    const translateMutationObserver = new TranslateMutationObserver((str, { node }) => {
-      called = true;
-      expect(node).not.null.not.undefined;
-      return str;
-    }, options);
-    translateMutationObserver.translate();
-
-    expect(called).true;
-  }
-
-  @test()
-  public defaultTargets(): void {
-    const text = faker.lorem.word().toLocaleLowerCase();
-    document.body.textContent = text;
-
-    const translateMutationObserver = new TranslateMutationObserver((str) => {
-      expect(str).equal(text);
-      return str;
-    });
-    translateMutationObserver.translate();
-  }
-
-  @test()
-  public targets(): void {
-    const text = faker.lorem.word().toLocaleLowerCase();
-    const div = document.createElement('div');
-    div.textContent = text;
-    const translateMutationObserver = new TranslateMutationObserver(this.t, {
-      targets: [div],
-    });
-    translateMutationObserver.translate();
-
-    expect(div).property('textContent', text.toLocaleUpperCase());
-  }
-
-  @test()
-  public attributes(): void {
-    const value = faker.lorem.word().toLocaleLowerCase();
-
-    const div = document.createElement('div');
-    div.setAttribute('id', value);
-    div.setAttribute('class', value);
-    div.setAttribute('src', value);
-
-    const translateMutationObserver = new TranslateMutationObserver(this.t, {
-      targets: [div],
-      attributes: ['id', 'class', 'src'],
-    });
-
-    translateMutationObserver.translate();
-
-    expect(div).property('id', value.toLocaleUpperCase());
-    expect(div).property('className', value.toLocaleUpperCase());
-    expect(div.getAttribute('src')).equal(value.toLocaleUpperCase());
-  }
-
-  @test()
-  public attributeStartsWith(): void {
-    const value = faker.lorem.word().toLocaleLowerCase();
-
-    const div = document.createElement('div');
-    div.dataset.test = value;
-
-    const translateMutationObserver = new TranslateMutationObserver(this.t, {
-      targets: [div],
-      attributeStartsWith: ['data-'],
-    });
-    translateMutationObserver.translate();
-
-    expect(div).property('dataset').property('test', value.toLocaleUpperCase());
-  }
-
-  @test()
-  public filter(): void {
-    const text = faker.lorem.word().toLocaleLowerCase();
-
-    const div = document.createElement('div');
-    const span1 = document.createElement('span');
-    span1.textContent = text;
-    const span2 = document.createElement('span');
-    span2.textContent = text;
-    span2.classList.add('do-not-translate');
-    div.appendChild(span1);
-    div.appendChild(span2);
-
-    const translateMutationObserver = new TranslateMutationObserver(this.t, {
-      targets: [div],
-      filter(node) {
-        return !(node instanceof Element && node.classList.contains('do-not-translate'));
-      },
-    });
-    translateMutationObserver.translate();
-
-    expect(span1).property('textContent', text.toLocaleUpperCase());
-    expect(span2).property('textContent', text);
-  }
-
-  @test()
-  public childNodes(): void {
-    const text = faker.lorem.word().toLocaleLowerCase();
-
-    const div = document.createElement('div');
-    const span = document.createElement('span');
-    span.textContent = text;
-    div.appendChild(span);
-
-    const translateMutationObserver = new TranslateMutationObserver(this.t, {
-      targets: [div],
-    });
-    translateMutationObserver.translate();
-
-    expect(span).property('textContent', text.toLocaleUpperCase());
-  }
-
-  @test()
-  public childAttribute(): void {
-    const value = faker.lorem.word().toLocaleLowerCase();
-
-    const div = document.createElement('div');
-    const span = document.createElement('span');
-    span.id = value;
-    div.appendChild(span);
-
-    const translateMutationObserver = new TranslateMutationObserver(this.t, {
-      targets: [div],
-      attributes: ['id'],
-    });
-    translateMutationObserver.translate();
-
-    expect(span).property('id', value.toLocaleUpperCase());
-  }
-
-  @test()
-  public customNode(): void {
-    const text = faker.lorem.word().toLocaleLowerCase();
-    const value = faker.lorem.word().toLocaleLowerCase();
-
-    const div = document.createElement('div');
-    const span = document.createElement('span');
-    span.id = value;
-    span.textContent = text;
-    div.appendChild(span);
-
-    const staticDiv = document.createElement('div');
-    staticDiv.id = value;
-    staticDiv.textContent = text;
-
-    const translateMutationObserver = new TranslateMutationObserver(this.t, {
-      targets: [staticDiv],
-      attributes: ['id'],
-    });
-    translateMutationObserver.translate([div]);
-
-    expect(span).property('textContent', text.toLocaleUpperCase());
-    expect(span).property('id', value.toLocaleUpperCase());
-
-    expect(staticDiv).property('textContent', text);
-    expect(staticDiv).property('id', value);
-  }
-
-  @test()
-  public doNotTranslateAttribute(): void {
-    const value = faker.lorem.word().toLocaleLowerCase();
-
-    const div = document.createElement('div');
-    const span = document.createElement('span');
-    span.id = value;
-    div.appendChild(span);
-
-    const translateMutationObserver = new TranslateMutationObserver(this.t, {
-      targets: [div],
-    });
-    translateMutationObserver.translate([div]);
-
-    expect(span).property('id', value);
-  }
-
+export default class TranslateMutationObserverTest extends TestBase {
   @test()
   public staticNew(): void {
     expect(TranslateMutationObserver.n(this.t)).property('constructor', TranslateMutationObserver);
   }
 
   @test()
-  public mutationFunction(): void {
+  public async mutationFunction(): Promise<void> {
     const text = faker.lorem.word().toLocaleLowerCase();
     const value = faker.lorem.word().toLocaleLowerCase();
 
@@ -247,64 +39,50 @@ export default class TranslateMutationObserverTest {
 
     const translateMutationObserver = new TranslateMutationObserver(this.t, {
       targets: [div],
-      attributes: ['id'],
+      filterAttribute: () => true,
     });
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    translateMutationObserver.mutationObserver.callback([
+    const p1 = translateMutationObserver.mutationObserver.callback([
       {
         target: div,
         addedNodes: [addedSpan],
       },
     ]);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    translateMutationObserver.mutationObserver.callback([]);
+    const p2 = translateMutationObserver.mutationObserver.callback([]);
+    await Promise.all([p1, p2]);
 
-    expect(span).property('id', value.toLocaleUpperCase());
-    expect(span).property('textContent', text.toLocaleUpperCase());
-    expect(addedSpan).property('id', addedValue.toLocaleUpperCase());
-    expect(addedSpan).property('textContent', addedText.toLocaleUpperCase());
+    expect(span).property('id', this.t(value));
+    expect(span).property('textContent', this.t(text));
+    expect(addedSpan).property('id', this.t(addedValue));
+    expect(addedSpan).property('textContent', this.t(addedText));
   }
 
   @test()
-  public nonElementNodeShouldIgnore(): void {
+  public async throwAndRecover(): Promise<void> {
     const text = faker.lorem.word().toLocaleLowerCase();
-    const value = faker.lorem.word().toLocaleLowerCase();
 
-    const title = document.createAttribute('title');
-    title.value = value;
-    const comment = document.createComment(text);
+    const div = document.createElement('div');
+    div.textContent = text;
 
-    const translateMutationObserver = new TranslateMutationObserver(this.t);
-    translateMutationObserver.translate([title, comment]);
-
-    expect(title).property('value', value);
-    expect(comment).property('nodeValue', text);
-  }
-
-  @test()
-  public translateAttributeSameValue(): void {
-    const value = faker.lorem.word().toLocaleLowerCase();
-
-    const span = document.createElement('span');
-    span.id = value;
-
-    const translateMutationObserver = new TranslateMutationObserver((str) => str, {
-      targets: [span],
-      attributes: ['id'],
+    const translateMutationObserver = new TranslateMutationObserver(() => {
+      throw new CustomError();
     });
-    translateMutationObserver.translate();
+    const mutations = [{ target: div, addedNodes: [] }];
 
-    expect(span).property('id', value);
-  }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    await expect(translateMutationObserver.mutationCallback(mutations)).rejectedWith(CustomError);
+    expect(div).property('textContent', text);
 
-  @test()
-  public typeCheck(): void {
-    expect(() => new TranslateMutationObserver(this.t, { targets: 1 } as never)).throw(TypeError);
-    expect(() => new TranslateMutationObserver(this.t, { attributes: 1 } as never)).throw(TypeError);
-    expect(() => new TranslateMutationObserver(this.t, { attributeStartsWith: 1 } as never)).throw(TypeError);
-  }
+    translateMutationObserver.translateFunction = this.t;
 
-  private t(str: string) {
-    return str.toLocaleUpperCase();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    await translateMutationObserver.mutationCallback(mutations);
+
+    expect(div).property('textContent', this.t(text));
   }
 }

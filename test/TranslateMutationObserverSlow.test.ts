@@ -1,42 +1,38 @@
-/* eslint-disable import/extensions */
-import './helper/MutationObserver.ts';
-import './helper/window.ts';
+import './setup';
 
 import { suite, test, timeout } from '@testdeck/mocha';
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import faker from 'faker';
 import ms from 'ms';
 
 import { TranslateMutationObserver } from '../src';
+import { TestBase } from './base';
+
+chai.use(chaiAsPromised);
 
 @suite()
 @timeout(ms('10m'))
-export default class TranslateMutationObserverSlowTest {
+export default class TranslateMutationObserverSlowTest extends TestBase {
   @test()
-  public maxStack(): void {
+  public async maxStack(): Promise<void> {
     const text = faker.random.alpha();
-    const i = 10000;
+    let i = 10000;
 
     const parentDiv = document.createElement('div');
     let ref = parentDiv;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const _ of Array(i)) {
+    while (i-- > 0) {
       const oldRef = ref;
       ref = document.createElement('div');
       oldRef.appendChild(ref);
     }
-
     ref.textContent = text;
 
     const translateMutationObserver = new TranslateMutationObserver(this.t, {
       targets: [parentDiv],
     });
-    translateMutationObserver.translate();
+    await translateMutationObserver.translate();
 
-    expect(ref).property('textContent', text.toLocaleUpperCase());
-  }
-
-  private t(str: string) {
-    return str.toLocaleUpperCase();
+    expect(ref).property('textContent', this.t(text));
   }
 }
