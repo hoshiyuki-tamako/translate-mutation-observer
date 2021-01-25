@@ -13,7 +13,7 @@
   "module": "dist/index.js",
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
-    "test:sample-server": "./node_modules/.bin/http-server",
+    "sample-server": "./node_modules/.bin/http-server",
     "test": "./node_modules/.bin/nyc ./node_modules/.bin/ts-mocha --check-leaks --parallel test/**/**/*test.ts",
     "build:test": "./node_modules/.bin/tsc --noEmit",
     "build:clean": "./node_modules/.bin/tsc --build --clean",
