@@ -24,6 +24,7 @@ module.exports = {
     'import/prefer-default-export': 'off',
     'import/extensions': 'off',
     'no-plusplus': 'off',
+    'object-curly-newline': 'off',
   },
   settings: {
     'import/resolver': {

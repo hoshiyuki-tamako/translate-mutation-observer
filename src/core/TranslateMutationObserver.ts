@@ -1,6 +1,6 @@
 import sleep from 'sleep-promise';
 
-import { NodeTranslator, TranslateFunction, TranslateOptions } from './NodeTranslator';
+import { cachedOptions, NodeTranslator, TranslateFunction, TranslateOptions } from './NodeTranslator';
 
 export class TranslateMutationObserver extends NodeTranslator {
   public static n(translateFunction: TranslateFunction, options?: TranslateOptions, mutationObserverOptions?: MutationObserverInit): TranslateMutationObserver {
@@ -30,7 +30,7 @@ export class TranslateMutationObserver extends NodeTranslator {
 
   private createMutationObserver(options?: MutationObserverInit) {
     const mutationObserver = new MutationObserver(this.mutationCallback.bind(this));
-    for (const dom of this.cachedOptions.targets) {
+    for (const dom of cachedOptions.get(this).targets) {
       mutationObserver.observe(dom, options || this.#defaultMutationObserverOptions);
     }
     return mutationObserver;

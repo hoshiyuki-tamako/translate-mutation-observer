@@ -41,18 +41,10 @@ export default class TranslateMutationObserverTest extends TestBase {
       targets: [div],
       filterAttribute: () => true,
     });
+
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const p1 = translateMutationObserver.mutationObserver.callback([
-      {
-        target: div,
-        addedNodes: [addedSpan],
-      },
-    ]);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const p2 = translateMutationObserver.mutationObserver.callback([]);
-    await Promise.all([p1, p2]);
+    await Promise.all([translateMutationObserver.mutationCallback([{ target: div, addedNodes: [addedSpan] }]), translateMutationObserver.mutationCallback([])]);
 
     expect(span).property('id', this.t(value));
     expect(span).property('textContent', this.t(text));

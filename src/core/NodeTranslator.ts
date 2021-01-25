@@ -20,6 +20,8 @@ type TranslateOptionsRequired = {
   filterAttribute: TranslateAttributeFilter,
 };
 
+export const cachedOptions = new WeakMap();
+
 export class NodeTranslator {
   public translateFunction: TranslateFunction;
 
@@ -41,9 +43,12 @@ export class NodeTranslator {
     }
 
     this.#originalOption = options;
-    this.cachedOptions.targets = this.#originalOption?.targets || this.#defaultOptions.targets;
-    this.cachedOptions.filter = this.#originalOption?.filter || this.#defaultOptions.filter;
-    this.cachedOptions.filterAttribute = this.#originalOption?.filterAttribute || this.#defaultOptions.filterAttribute;
+
+    cachedOptions.set(this, {
+      targets: this.#originalOption?.targets || this.#defaultOptions.targets,
+      filter: this.#originalOption?.filter || this.#defaultOptions.filter,
+      filterAttribute: this.#originalOption?.filterAttribute || this.#defaultOptions.filterAttribute,
+    });
   }
 
   public get options(): TranslateOptions | undefined {
@@ -59,8 +64,6 @@ export class NodeTranslator {
     filterAttribute: () => false,
   } as TranslateOptionsRequired;
 
-  protected cachedOptions = this.#defaultOptions;
-
   public constructor(translateFunction: TranslateFunction, options?: TranslateOptions) {
     this.translateFunction = translateFunction;
     this.options = options;
@@ -68,11 +71,11 @@ export class NodeTranslator {
 
   //
   public async translate(nodes?: Iterable<Node>): Promise<void> {
-    const iterators = [nodes || this.cachedOptions.targets];
+    const iterators = [nodes || cachedOptions.get(this).targets];
     const translatePromises = [] as Promise<void>[];
     while (iterators.length) {
       for (const node of iterators.pop() as Iterable<Node>) {
-        if (this.cachedOptions.filter(node)) {
+        if (cachedOptions.get(this).filter(node)) {
           if (node.nodeType === node.TEXT_NODE && node.nodeValue) {
             const text = node.nodeValue;
             translatePromises.push((async () => {
@@ -80,7 +83,7 @@ export class NodeTranslator {
             })());
           } else if (node instanceof Element) {
             for (const attribute of node.attributes) {
-              if (this.cachedOptions.filterAttribute(attribute, node) && attribute.value) {
+              if (cachedOptions.get(this).filterAttribute(attribute, node) && attribute.value) {
                 const { value } = attribute;
                 translatePromises.push((async () => {
                   const newValue = await this.translateFunction(value, { node });

@@ -1,2 +1,2 @@
 export * from './TranslateMutationObserver';
-export * from './NodeTranslator';
+export { NodeTranslator } from './NodeTranslator';
