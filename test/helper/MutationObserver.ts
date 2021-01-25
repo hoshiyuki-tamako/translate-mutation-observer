@@ -1,7 +1,6 @@
-type MutationCallback<T> = (mutationRecords: MutationRecord[]) => T;
-
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+// @ts-nocheck
+type MutationCallback<T> = (mutationRecords: MutationRecord[]) => T;
 globalThis.MutationObserver = class MutationObserver<T> {
   public callback: MutationCallback<T>;
 
