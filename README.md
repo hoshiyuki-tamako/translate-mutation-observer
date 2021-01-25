@@ -44,7 +44,7 @@ translateMutationObserver.translate();
 
 ```html
 <script type="module">
-import { TranslateMutationObserver } from 'https://unpkg.com/translate-mutation-observer@1.0.4/dist/index.js';
+import { TranslateMutationObserver } from 'https://unpkg.com/translate-mutation-observer@^1/dist/index.js';
 TranslateMutationObserver.n((str) => str.toLocaleLowerCase());
 document.body.innerText = "TEST";
 </script>

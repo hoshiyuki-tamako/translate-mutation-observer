@@ -234,6 +234,12 @@ export default class TranslateMutationObserverTest {
     span.textContent = text;
     div.appendChild(span);
 
+    const addedText = faker.random.alpha();
+    const addedValue = faker.random.alpha();
+    const addedSpan = document.createElement('span');
+    addedSpan.id = addedValue;
+    addedSpan.textContent = addedText;
+
     const translateMutationObserver = new TranslateMutationObserver(this.t, {
       targets: [div],
       attributes: ['id'],
@@ -242,14 +248,16 @@ export default class TranslateMutationObserverTest {
     translateMutationObserver.mutationObserver.callback([
       {
         target: div,
-        addedNodes: [span],
+        addedNodes: [addedSpan],
       },
     ]);
     // @ts-ignore
     translateMutationObserver.mutationObserver.callback([]);
 
-    expect(span).property('textContent', text.toLocaleUpperCase());
     expect(span).property('id', value.toLocaleUpperCase());
+    expect(span).property('textContent', text.toLocaleUpperCase());
+    expect(addedSpan).property('id', addedValue.toLocaleUpperCase());
+    expect(addedSpan).property('textContent', addedText.toLocaleUpperCase());
   }
 
   @test()
@@ -266,6 +274,22 @@ export default class TranslateMutationObserverTest {
 
     expect(title).property('value', value);
     expect(comment).property('nodeValue', text);
+  }
+
+  @test()
+  public translateAttributeSameValue(): void {
+    const value = faker.random.alpha();
+
+    const span = document.createElement('span');
+    span.id = value;
+
+    const translateMutationObserver = new TranslateMutationObserver((str) => str, {
+      targets: [span],
+      attributes: ['id'],
+    });
+    translateMutationObserver.translate();
+
+    expect(span).property('id', value);
   }
 
   @test()
