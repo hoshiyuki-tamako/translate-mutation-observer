@@ -6,9 +6,11 @@
 
 Translate html page using mutation observer
 
-This only work on certain type of DOM changes such as appendChild()
+## Notes
 
-search for `MutationObserver` for more info
+This only work on certain type of DOM changes such as appendChild() search for `MutationObserver` for more info
+
+Required ES2019 `Array.prototype.flat`. you may want to polyfill for that function
 
 ## Documentation
 

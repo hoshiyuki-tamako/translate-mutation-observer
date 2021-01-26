@@ -11,7 +11,7 @@ export class TranslateMutationObserver extends NodeTranslator {
 
   public mutationObserver: MutationObserver;
 
-  #queue = false;
+  #queued = new Set<Node>();
 
   #originalMutationObserverOptions?: MutationObserverInit;
 
@@ -39,19 +39,22 @@ export class TranslateMutationObserver extends NodeTranslator {
   }
 
   private async mutationCallback(mutations: MutationRecord[]): Promise<void> {
-    if (this.#queue) {
-      return;
+    const nodes = [...mutations]
+      .map((mutation) => [mutation.target, ...mutation.addedNodes])
+      .flat()
+      .filter((node) => !(this.#queued.has(node) || [...this.#queued.values()].some((p) => p.contains(node))));
+
+    for (const node of nodes) {
+      this.#queued.add(node);
     }
-    this.#queue = true;
-    const translatePromises = [] as Promise<void>[];
-    for (const mutation of mutations) {
-      translatePromises.push(this.translate([mutation.target]), this.translate(mutation.addedNodes));
-    }
+
     try {
-      await Promise.all(translatePromises);
+      await this.translate(nodes);
     } finally {
       await sleep(0);
-      this.#queue = false;
+      for (const node of nodes) {
+        this.#queued.delete(node);
+      }
     }
   }
 }
