@@ -39,7 +39,7 @@ export class TranslateMutationObserver extends NodeTranslator {
   }
 
   private async mutationCallback(mutations: MutationRecord[]): Promise<void> {
-    const nodes = [...mutations]
+    const nodes = mutations
       .map((mutation) => [mutation.target, ...mutation.addedNodes])
       .flat()
       .filter((node) => !(this.#queued.has(node) || [...this.#queued.values()].some((p) => p.contains(node))));
