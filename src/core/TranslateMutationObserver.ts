@@ -39,13 +39,18 @@ export class TranslateMutationObserver extends NodeTranslator {
   }
 
   private async mutationCallback(mutations: MutationRecord[]): Promise<void> {
-    const nodes = mutations
-      .map((mutation) => [mutation.target, ...mutation.addedNodes])
-      .flat()
-      .filter((node) => !(this.#queued.has(node) || [...this.#queued.values()].some((p) => p.contains(node))));
-
-    for (const node of nodes) {
-      this.#queued.add(node);
+    const nodes = [] as Node[];
+    for (const mutation of mutations) {
+      if (!this.hasNode(mutation.target)) {
+        nodes.push(mutation.target);
+        this.#queued.add(mutation.target);
+      }
+      for (const node of mutation.addedNodes) {
+        if (!this.hasNode(node)) {
+          nodes.push(node);
+          this.#queued.add(node);
+        }
+      }
     }
 
     try {
@@ -56,5 +61,19 @@ export class TranslateMutationObserver extends NodeTranslator {
         this.#queued.delete(node);
       }
     }
+  }
+
+  private hasNode(node: Node) {
+    if (this.#queued.has(node)) {
+      return true;
+    }
+
+    for (const queued of this.#queued.values()) {
+      if (queued.contains(node)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

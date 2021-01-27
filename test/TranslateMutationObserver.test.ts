@@ -77,4 +77,28 @@ export default class TranslateMutationObserverTest extends TestBase {
 
     expect(div).property('textContent', this.t(text));
   }
+
+  @test()
+  public async addedChildShouldOnlyCallOnce(): Promise<void> {
+    const text = faker.lorem.word().toLocaleLowerCase();
+
+    const div = document.createElement('div');
+    const span = document.createElement('span');
+    span.textContent = text;
+    div.append(span);
+
+    let count = 0;
+    const translateMutationObserver = new TranslateMutationObserver((str) => {
+      ++count;
+      return this.t(str);
+    });
+    const mutations = [{ target: div, addedNodes: [span] }];
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    await Promise.all([expect(translateMutationObserver.mutationCallback(mutations)), expect(translateMutationObserver.mutationCallback(mutations))]);
+    expect(div).property('textContent', this.t(text));
+    expect(span).property('textContent', this.t(text));
+    expect(count).equal(1);
+  }
 }
